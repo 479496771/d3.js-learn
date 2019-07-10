@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="./d3.min.js"></script>
+</head>
+<style>
+    line#limit {
+        stroke: #FED966;
+        stroke-width: 3;
+        stroke-dasharray: 3 6;
+    }
+
+    .grid path {
+        stroke-width: 3;
+    }
+
+    .grid .tick line {
+        stroke: #9FAAAE;
+        stroke-opacity: 0.2;
+    }
+</style>
+
+<body>
+    <svg></svg>
+</body>
+
+</html>
+<script>
+    window.onload = function () {
+        var dataset = [5, 10, 13, 19, 21, 25, 22, 18, 15, 13, 11, 12, 15, 20, 18, 17, 16, 18, 23, 25];
+        const sample = [{
+            language: 'a',
+            value: 90
+        }, {
+            language: 'b',
+            value: 60
+        }, {
+            language: 'c',
+            value: 0
+        }, {
+            language: 'd',
+            value: 10
+        }, {
+            language: 'e',
+            value: 70
+        }, {
+            language: 'f',
+            value: 60
+        }, {
+            language: 'g',
+            value: 55
+        }, {
+            language: 'h',
+            value: 40
+        }, {
+            language: 'i',
+            value: 30
+        }, {
+            language: 'j',
+            value: 20
+        }, {
+            language: 'k',
+            value: 10
+        }]
+        const margin = 60;
+        const width = 1000 - 2 * margin;
+        const height = 600 - 2 * margin;
+
+        const svg = d3.select('svg').style('width', '1000').style('height', '600')
+
+        const chart = svg.append('g').attr('transform', `translate(${margin},${margin})`)
+
+        const yScale = d3.scaleLinear().range([height, 0]).domain([0, 100])
+
+        chart.append('g').call(d3.axisLeft(yScale))
+
+        const xScale = d3.scaleBand()
+            .range([0, width])
+            .domain(sample.map((s) => s.language))
+            .padding(0.1)
+
+        const w = d3.scaleBand()
+            .range([0, width])
+            .domain(sample.map((s) => s.language))
+            .bandwidth()
+
+
+        chart.append('g')
+            .attr('transform', `translate(0, ${height})`)
+            .call(d3.axisBottom(xScale));
+
+        chart.selectAll()
+            .data(sample)
+            .enter()
+            .append('rect')
+            .attr('x', (s) => xScale(s.language))
+            .attr('y', (s) => {
+                return yScale(s.value)
+            })
+            .attr('height', (s) => height - yScale(s.value))
+            .attr('width', w - 10)
+
+        chart.append('g')
+            .attr('class', 'grid')
+            .call(d3.axisLeft()
+                .scale(yScale)
+                .tickSize(-width, 0, 0)
+                .tickFormat(''))
+
+        svg.append('text')
+            .attr('x', -80)
+            .attr('y', 20)
+            .attr('transform', 'rotate(-90)')
+            .text('(%)')
+
+        svg.append('text')
+            .attr('x', width / 2 + margin)
+            .attr('y', 40)
+            .attr('text-anchor', 'middle')
+            .text('本图由miaomiao著作')
+
+        d3.selectAll('rect').on('mouseenter', function () {
+                d3.select(this).attr('opacity', 0.5)
+                chart.append('line')
+                    .attr('x1', 0)
+                    .attr('y1', y)
+                    .attr('x2', width)
+                    .attr('y2', y)
+                    .attr('stroke', 'red')
+
+
+            })
+            .on('mouseleave', function () {
+                d3.select(this).attr('opacity', 1)
+            })
+    }
+</script>

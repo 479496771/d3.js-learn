@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <script charset="utf-8" src="https://d3js.org/d3.v5.min.js"></script>
+  </head>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    .app {
+      width: 100%;
+      height: 100vh;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: red;
+      position: absolute;
+    }
+  </style>
+
+  <body>
+    <div class="app"></div>
+  </body>
+</html>
+
+<script>
+  d3.select(".app").on("mousemove", function(d, i) {
+    let x = d3.mouse(this);
+    throttleAjax(x);
+  });
+
+  function throttle(fun, delay) {
+    let left, top;
+    return function(args) {
+      let Top, Left;
+      if (left === undefined) {
+        left = args[0];
+      } else {
+        Left = Math.abs(args[0] - left);
+      }
+      if (top === undefined) {
+        top = args[1];
+      } else {
+        Top = Math.abs(args[1] - top);
+      }
+
+      if (Left > 110 || Top > 110) {
+        fun.apply(this, arguments);
+        left = args[0];
+        top = args[1];
+      }
+    };
+  }
+
+  function foo(x) {
+    d3.select(".app")
+      .append("div")
+      .style("width", "100px")
+      .style("height", "100px")
+      .style("display", "none")
+      .style("position", "absolute")
+      .style("left", x[0] - 50 + "px")
+      .style("top", x[1] - 50 + "px")
+      .style("display", "block")
+      .style("border-radius", "50%")
+      .style("background", "red")
+      .transition()
+      .duration(750)
+      .style("background", "#000")
+      .style("width", "50px")
+      .style("height", "50px")
+      .remove();
+  }
+  let throttleAjax = throttle(foo, 100);
+</script>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<body>
+    <svg></svg>
+    <div id="slider"></div>
+</body>
+
+</html>
+<script src='./d3.min.js'></script>
+
+<script>
+    const svg = d3.select('svg').attr('height', '600').attr('width', '600').attr('transform', 'translate(50,50)')
+
+    // 绘制圆弧 不定义结束圆弧角  作为公共方法
+    var arc = d3.arc().innerRadius(80).outerRadius(100).startAngle(0)
+    const g = svg.append('g').attr('transform', 'translate(100,100)')
+
+    //画底层整园环（定义结束圆弧角）
+    g.append('path').datum({
+        endAngle: 2 * Math.PI
+    }).style("fill", "#FDF1E6").attr('d', arc)
+
+    //画顶部表示数量的圆弧 （定义结束圆弧角）
+    const color = g.append('path').datum({
+        endAngle: Math.PI * 0 / 180
+    }).style("fill", "#FFC125").attr('d', arc)
+
+    //设置圆环中心文字样式和位置
+    const text = g.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'middle')
+        .attr('font-size', '38px')
+
+    //绘制矩形
+    const g1 = svg.append('g').attr('transform', 'translate(0,300)')
+
+
+    //绘制底层矩形
+    const backRect = g1.append('rect').attr('height', '30').attr('fill', '#efefef').attr('width', '200')
+
+    //绘制顶层矩形
+    const topRect = g1.append('rect').attr('height', '30').attr('class', 'topRect')
+
+    //编辑文字
+
+    //定时器 变换顶部圆弧的结束圆弧角 和 颜色
+    d3.interval(function () {
+        color.transition().duration(750).attrTween('d', function (d) {
+                var compute = d3.interpolate(d.endAngle, Math.random() * Math.PI *
+                    2); //注意这里的d.endAngle,表示每次变化的起始值
+                return function (t) {
+                    d.endAngle = compute(t)
+                    var data = d.endAngle / Math.PI / 2 * 100;
+                    //设置数值
+                    d3.select('text').text(data.toFixed(0) + '%')
+                    return arc(d)
+                }
+            })
+            .styleTween('fill', function (d) {
+                return function (t) {
+                    var colorLinear = d3.scaleLinear().domain([0, 100]).range(["#EEE685", "#EE3B3B"]);
+                    var data = d.endAngle / Math.PI / 2 * 100;
+                    //返回数值对应的色值
+                    return colorLinear(data);
+                }
+            })
+
+        d3.select('.topRect').transition().duration(750).attrTween('width', function () {
+                var w = parseFloat(d3.select('.topRect').style('width'))
+                var i = d3.interpolate(w, Math.random() * 200); //注意这里的w,表示每次变化的起始值
+                var ci = d3.interpolate('#2394F5', '#BDF436');
+                return (t) => {
+                    this.style.width = i(t) + 'px';
+                    // this.style.background = ci(t);
+                };
+            })
+            .attrTween('background-color', function () {
+                var colorLinear = d3.scaleLinear().domain([0, 200]).range(["#EEE685", "#EE3B3B"]);
+                var w = parseFloat(d3.select('.topRect').style('width'))
+                console.log(colorLinear(w))
+                return colorLinear(w)
+            })
+
+
+    }, 1000)
+</script>
+
+<script>
+    d3.interval(function () {
+        d3.select("#slider").transition()
+            .duration(1000)
+            .attrTween("width", function () {
+                var i = d3.interpolate(20, 400);
+                var ci = d3.interpolate('#2394F5', '#BDF436');
+                var that = this;
+                return function (t) {
+                    that.style.width = i(t) + 'px';
+                    that.style.background = ci(t);
+                };
+            });
+    }, 1500)
+</script>

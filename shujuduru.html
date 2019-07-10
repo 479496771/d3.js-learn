@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src='./d3.min.js'></script>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<body>
+    <svg></svg>
+</body>
+
+</html>
+<script>
+    const svg = d3.select('svg').attr('width', '1000').attr('height', '600').attr('transform', 'translate(50,50)');
+    const height = svg.attr('height');
+    const width = svg.attr('width');
+    const margin = {
+        left: 60,
+        top: 10,
+        right: 20,
+        bottom: 30
+    };
+    const innerHeight = height - margin.top - margin.bottom;
+    const innerWidth = width - margin.left - margin.right;
+
+    var max, min;
+
+    const render = data => {
+        const xScale = d3.scaleLinear()
+            .domain([0, max])
+            .range([0, innerWidth])
+
+        const yScale = d3.scaleBand()
+            .domain(data.map(d => d.country))
+            .range([0, innerHeight])
+            .padding(0.15)
+
+        const g = svg.append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`)
+
+        g.selectAll('rect')
+            .data(data).enter()
+            .append('rect')
+            .attr('y', d => yScale(d.country))
+            .attr('width', d => xScale(d.population))
+            .attr('height', yScale.bandwidth)
+
+        g.append('g').call(d3.axisLeft(yScale)); //左边显示country
+        g.append('g').call(d3.axisBottom(xScale))
+            .attr('transform', `translate(0,${innerHeight})`)
+    }
+
+    const data = d3.csv('./data.csv').then(data => {
+        data.forEach(element => {
+            element.population = element.population * 1000
+        }); //处理完数据，就可以开始画图了
+        max = d3.max(data, d => d.population)
+        min = d3.min(data, d => d.population)
+        render(data)
+
+
+
+
+    })
+</script>
